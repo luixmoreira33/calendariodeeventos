@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: #79aec8;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Nova Solicitação de Cadastro de Usuário</h1>
+        </div>
+        <div class="content">
+            <p>Uma nova solicitação de cadastro de usuário foi recebida:</p>
+            
+            <h2>Detalhes da Solicitação:</h2>
+            <ul>
+                <li><strong>Nome:</strong> {{ user_request.name }}</li>
+                <li><strong>Sobrenome:</strong> {{ user_request.surname }}</li>
+                <li><strong>Email:</strong> {{ user_request.email }}</li>
+                <li><strong>Telefone:</strong> {{ user_request.phone }}</li>
+                <li><strong>Nome da Loja:</strong> {{ user_request.lodge_name }}</li>
+                <li><strong>Número da Loja:</strong> {{ user_request.lodge_number }}</li>
+                {% if user_request.message %}
+                <li><strong>Mensagem:</strong> {{ user_request.message }}</li>
+                {% endif %}
+            </ul>
+            
+            <p>Por favor, acesse o painel administrativo para revisar esta solicitação.</p>
+            <p><a href="{{ login_url }}/admin/calendarrequest/userrequest/">{{ login_url }}/admin/calendarrequest/userrequest/</a></p>
+        </div>
+        <div class="footer">
+            <p>Este é um email automático. Por favor, não responda a este email.</p>
+        </div>
+    </div>
+</body>
+</html> 

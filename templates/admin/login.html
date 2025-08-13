@@ -1,0 +1,9 @@
+{% extends "admin/login.html" %}
+{% load i18n static %}
+
+{% block content %}
+{{ block.super }}
+<div class="text-center mt-3">
+    <p>Não tem uma conta? <a href="{% url 'calendarrequest:user_request' %}">Solicite o cadastro de um usuário</a></p>
+</div>
+{% endblock %} 

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: #79aec8;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Nova Solicitação de Criação de Loja</h1>
+        </div>
+        <div class="content">
+            <p>Uma nova solicitação de criação de loja foi recebida:</p>
+            
+            <h2>Detalhes da Solicitação:</h2>
+            <ul>
+                <li><strong>Nome da Loja:</strong> {{ store_request.name }}</li>
+                <li><strong>Número da Loja:</strong> {{ store_request.number }}</li>
+                <li><strong>Endereço:</strong> {{ store_request.address }}</li>
+                <li><strong>Proprietário:</strong> {{ store_request.owner_name }}</li>
+                <li><strong>Email do Proprietário:</strong> {{ store_request.owner_email }}</li>
+                <li><strong>Telefone:</strong> {{ store_request.phone }}</li>
+                {% if store_request.description %}
+                <li><strong>Descrição:</strong> {{ store_request.description }}</li>
+                {% endif %}
+                {% if store_request.additional_info %}
+                <li><strong>Informações Adicionais:</strong> {{ store_request.additional_info }}</li>
+                {% endif %}
+            </ul>
+            
+            <p>Por favor, acesse o painel administrativo para revisar esta solicitação de criação de loja.</p>
+            <p><a href="{{ login_url }}">{{ login_url }}</a></p>
+        </div>
+        <div class="footer">
+            <p>Este é um email automático. Por favor, não responda a este email.</p>
+        </div>
+    </div>
+</body>
+</html> 

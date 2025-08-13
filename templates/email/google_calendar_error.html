@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: #dc3545;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        .error-details {
+            background: #fff3f3;
+            border: 1px solid #dc3545;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .event-details {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Erro na Operação do Google Calendar</h1>
+        </div>
+        <div class="content">
+            <p>Ocorreu um erro durante a operação no Google Calendar:</p>
+            
+            <div class="error-details">
+                <h3>Detalhes do Erro:</h3>
+                <p><strong>Operação:</strong> {{ operation }}</p>
+                <p><strong>Mensagem de Erro:</strong> {{ error_message }}</p>
+            </div>
+
+            <div class="event-details">
+                <h3>Detalhes do Evento:</h3>
+                <ul>
+                    <li><strong>ID do Evento:</strong> {{ event.id }}</li>
+                    <li><strong>Título:</strong> {{ event.title }}</li>
+                    <li><strong>Descrição:</strong> {{ event.description }}</li>
+                    <li><strong>Local:</strong> {{ event.address }}</li>
+                    <li><strong>Data de Início:</strong> {{ event.start_time }}</li>
+                    <li><strong>Data de Término:</strong> {{ event.end_time }}</li>
+                    <li><strong>ID do Evento no Google Calendar:</strong> {{ event.google_event_id|default:"N/A" }}</li>
+                </ul>
+            </div>
+
+            <p>Por favor, verifique os detalhes acima e tome as ações necessárias para resolver o problema.</p>
+        </div>
+        <div class="footer">
+            <p>Este é um email automático. Por favor, não responda a este email.</p>
+        </div>
+    </div>
+</body>
+</html> 

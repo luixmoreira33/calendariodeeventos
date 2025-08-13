@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: #28a745;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        .event-details {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+        .calendar-link {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        .calendar-link:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Evento Criado com Sucesso!</h1>
+        </div>
+        <div class="content">
+            <p>Olá {{ event.user.first_name }},</p>
+            
+            <p>Seu evento foi criado e adicionado ao Google Calendar com sucesso!</p>
+            
+            <div class="event-details">
+                <h3>Detalhes do Evento:</h3>
+                <ul>
+                    <li><strong>Título:</strong> {{ event.title }}</li>
+                    <li><strong>Loja:</strong> {{ event.lodge.name }}</li>
+                    <li><strong>Descrição:</strong> {{ event.description }}</li>
+                    <li><strong>Local:</strong> {{ event.address }}</li>
+                    <li><strong>Data de Início:</strong> {{ event.start_time|date:"d/m/Y H:i" }}</li>
+                    <li><strong>Data de Término:</strong> {{ event.end_time|date:"d/m/Y H:i" }}</li>
+                </ul>
+            </div>
+
+            <p>O evento já está disponível no seu Google Calendar. Você pode acessá-lo através do link abaixo:</p>
+            <p style="text-align: center;">
+                <a href="{{ calendar_url }}" class="calendar-link" target="_blank">
+                    Acessar Google Calendar
+                </a>
+            </p>
+
+            <p>Se precisar fazer alguma alteração no evento, você pode editá-lo através do sistema.</p>
+        </div>
+        <div class="footer">
+            <p>Este é um email automático. Por favor, não responda a este email.</p>
+        </div>
+    </div>
+</body>
+</html> 
