@@ -1,0 +1,62 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: eventos
+      POSTGRES_USER: maconariaeventouser
+      POSTGRES_PASSWORD: glmerjeventosgestao25
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - nginx-network
+
+  web:
+    build: .
+    command: >
+      sh -c "mkdir -p static && \
+             echo '0 0 * * * cd /app && export PYTHONPATH=/app && /usr/local/bin/python3 events/googlecalendar/cron_job.py >> /var/log/cron.log 2>&1' > /etc/cron.d/google-calendar-cron && \
+             chmod 0644 /etc/cron.d/google-calendar-cron && \
+             touch /var/log/cron.log && \
+             crontab /etc/cron.d/google-calendar-cron && \
+             service cron start && \
+             echo '⏳ Waiting for database...' && \
+             until nc -z db 5432; do sleep 1; done && \
+             echo '✅ Database available. Running migrations...' && \
+             python manage.py makemigrations && \
+             python manage.py migrate && \
+             exec gunicorn core.wsgi:application --bind 0.0.0.0:8000"
+    volumes:
+      - cron_logs:/var/log
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    env_file:
+      - .env
+    networks:
+      - nginx-network
+
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx-proxy-manager
+    restart: always
+    ports:
+      - "80:80"      
+      - "81:81"       
+      - "443:443"     
+    volumes:
+      - ./data:/data
+      - ./data/letsencrypt:/etc/letsencrypt
+    networks:
+      - nginx-network
+
+volumes:
+  postgres_data:
+  cron_logs:
+
+networks:
+  nginx-network:
