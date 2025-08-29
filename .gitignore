@@ -1,0 +1,27 @@
+# Distribution / packaging
+.git/
+.Python
+dist/
+eggs/
+.eggs/
+*.egg/
+*.egg-info/
+.installed.cfg
+*.egg
+*.pyc
+**/__pycache__/*
+*.py[cod]
+.vscode/
+venv/
+.venv/
+.idea/
+
+# env files
+.env
+
+# folders
+media/
+
+# Google Credentials
+local.credentials.json
+local.token.json
