@@ -3,14 +3,20 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from lodge.models import Lodge
-
-
+from setup.models import Profession
 
 
 class CustomUser(AbstractUser):
     phone_number = models.CharField(
         max_length=15,
         verbose_name=_('Número de telefone'),
+        blank=True,
+        null=True
+    )
+    profession = models.ForeignKey(
+        Profession,
+        on_delete=models.CASCADE,
+        verbose_name=_('Profissão'),
         blank=True,
         null=True
     )

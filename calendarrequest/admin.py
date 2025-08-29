@@ -103,13 +103,14 @@ class CancelEventRequestAdmin(admin.ModelAdmin):
 
 @admin.register(UserRequest)
 class UserRequestAdmin(admin.ModelAdmin):
-    list_display = ('name', 'surname', 'email', 'phone', 'lodge_number', 'approved')
-    list_filter = ('approved',)
+    list_display = ('name', 'surname', 'email', 'phone', 'profession', 'lodge_name', 'lodge_number', 'approved', 'created_at')
+    list_filter = ('approved', 'profession', 'created_at')
     search_fields = (
         'name',
         'surname',
         'email',
         'phone',
+        'profession__name',
         'lodge_name',
         'lodge_number'
     )
@@ -118,11 +119,32 @@ class UserRequestAdmin(admin.ModelAdmin):
         'surname',
         'email',
         'phone',
+        'profession',
         'lodge_name',
         'lodge_number',
         'message',
         'created_at',
         'updated_at'
+    )
+    
+    fieldsets = (
+        ('Informações Pessoais', {
+            'fields': ('name', 'surname', 'email', 'phone', 'profession')
+        }),
+        ('Informações da Loja', {
+            'fields': ('lodge_name', 'lodge_number')
+        }),
+        ('Mensagem', {
+            'fields': ('message',),
+            'classes': ('collapse',)
+        }),
+        ('Aprovação', {
+            'fields': ('approved',)
+        }),
+        ('Auditoria', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        })
     )
 
     def has_delete_permission(self, request, obj=None):
@@ -132,3 +154,12 @@ class UserRequestAdmin(admin.ModelAdmin):
         if obj and obj.approved:
             return [f.name for f in self.model._meta.fields]
         return self.readonly_fields
+    
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        obj = self.get_object(request, object_id)
+        if obj and obj.approved:
+            extra_context['show_save'] = False
+            extra_context['show_save_and_continue'] = False
+            extra_context['show_save_and_add_another'] = False
+        return super().change_view(request, object_id, form_url, extra_context=extra_context)

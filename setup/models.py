@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
 
 class Setup(models.Model):
     url = models.CharField(
@@ -25,3 +24,22 @@ class Setup(models.Model):
     class Meta:
         verbose_name = 'Configuração'
         verbose_name_plural = 'Configurações'
+
+
+class Profession(models.Model):
+    name = models.CharField(
+        max_length=255,
+        verbose_name='Nome'
+    )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name='Ativo'
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Profissão'
+        verbose_name_plural = 'Profissões'
+        ordering = ['name']

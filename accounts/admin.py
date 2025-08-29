@@ -12,15 +12,15 @@ class UserLodgeInline(admin.TabularInline):
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'phone_number', 'is_staff')
-    list_filter = ('is_staff', 'is_superuser', 'groups',)
-    search_fields = ('username', 'first_name', 'last_name', 'email', 'phone_number')
+    list_display = ('username', 'email', 'phone_number', 'profession', 'is_staff')
+    list_filter = ('is_staff', 'is_superuser', 'groups', 'profession')
+    search_fields = ('username', 'first_name', 'last_name', 'email', 'phone_number', 'profession__name')
     ordering = ('username',)
     inlines = [UserLodgeInline]
 
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        (_('Informações pessoais'), {'fields': ('first_name', 'last_name', 'email', 'phone_number')}),
+        (_('Informações pessoais'), {'fields': ('first_name', 'last_name', 'email', 'phone_number', 'profession')}),
         (_('Permissões'), {
             'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
         }),
@@ -30,17 +30,17 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'password1', 'password2', 'email', 'phone_number',),
+            'fields': ('username', 'password1', 'password2', 'email', 'phone_number', 'profession'),
         }),
     )
 
 
 @admin.register(Brother)
 class BrotherAdmin(admin.ModelAdmin):
-    list_display = ('get_full_name', 'get_lodges', 'email', 'phone_number')
-    search_fields = ('first_name', 'last_name', 'email', 'phone_number')
-    list_filter = ('userlodge__lodge',)
-    readonly_fields = ('get_full_name', 'get_lodges', 'email', 'phone_number', 'username', 'first_name', 'last_name')
+    list_display = ('get_full_name', 'get_lodges', 'email', 'phone_number', 'profession')
+    search_fields = ('first_name', 'last_name', 'email', 'phone_number', 'profession__name')
+    list_filter = ('userlodge__lodge', 'profession')
+    readonly_fields = ('get_full_name', 'get_lodges', 'email', 'phone_number', 'username', 'first_name', 'last_name', 'profession')
     
     list_display_links = None    
     actions = None

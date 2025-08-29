@@ -44,6 +44,9 @@
                 <li><strong>Sobrenome:</strong> {{ user_request.surname }}</li>
                 <li><strong>Email:</strong> {{ user_request.email }}</li>
                 <li><strong>Telefone:</strong> {{ user_request.phone }}</li>
+                {% if user_request.profession %}
+                <li><strong>Profissão:</strong> {{ user_request.profession }}</li>
+                {% endif %}
                 <li><strong>Nome da Loja:</strong> {{ user_request.lodge_name }}</li>
                 <li><strong>Número da Loja:</strong> {{ user_request.lodge_number }}</li>
                 {% if user_request.message %}

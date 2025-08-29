@@ -33,6 +33,13 @@
     .form-group textarea {
         min-height: 100px;
     }
+    .form-group select {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background-color: white;
+    }
     .submit-row {
         margin-top: 2rem;
         text-align: right;
@@ -132,6 +139,14 @@
             {{ form.phone }}
             {% if form.phone.errors %}
             <div class="error">{{ form.phone.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="id_profession">Profissão:</label>
+            {{ form.profession }}
+            {% if form.profession.errors %}
+            <div class="error">{{ form.profession.errors }}</div>
             {% endif %}
         </div>
 

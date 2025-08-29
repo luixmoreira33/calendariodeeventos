@@ -1,6 +1,6 @@
 import logging
 
-from django.db import models
+from django.db import models, transaction
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -62,21 +62,42 @@ class StoreRequest(Trackable):
 
 @receiver(post_save, sender=StoreRequest)
 def create_lodge_on_approval(sender, instance, created, **kwargs):
+    logger = logging.getLogger(__name__)
     setup = Setup.objects.last()
 
-    if created:
-        # Send notification email to admin when a new store request is created
+    if created and setup:
+        # Use transaction.on_commit to avoid transaction issues
+        transaction.on_commit(lambda: _send_store_request_notification(instance, setup, logger))
+
+    if instance.approved and not created and setup:
+        # Use transaction.on_commit to avoid transaction issues
+        transaction.on_commit(lambda: _create_lodge_and_notify(instance, setup, logger))
+
+
+def _send_store_request_notification(instance, setup, logger):
+    """
+    Helper function to send store request notification after transaction commit
+    """
+    try:
         send_email_notification(
             subject='Nova Solicitação de Criação de Loja',
             template_name='email/store_request_notification.html',
             context={
                 'store_request': instance,
-                'login_url': f"{setup.url}"
+                'login_url': setup.url
             },
             recipient_list=[setup.admin_email]
         )
+        logger.info(f"Store request notification sent to {setup.admin_email}")
+    except Exception as e:
+        logger.error(f"Error sending store request notification: {e}")
 
-    if instance.approved and not created:
+
+def _create_lodge_and_notify(instance, setup, logger):
+    """
+    Helper function to create lodge and send approval notification after transaction commit
+    """
+    try:
         lodge, created = Lodge.objects.get_or_create(
             name=instance.name,
             defaults={
@@ -85,6 +106,8 @@ def create_lodge_on_approval(sender, instance, created, **kwargs):
             }
         )
         
+        logger.info(f"Lodge {'created' if created else 'found'}: {lodge.name}")
+        
         # Send approval notification email to the user
         send_email_notification(
             subject='Sua solicitação de loja foi aprovada',
@@ -92,10 +115,15 @@ def create_lodge_on_approval(sender, instance, created, **kwargs):
             context={
                 'store_request': instance,
                 'lodge': lodge,
-                'login_url': f"{setup.url}"
+                'login_url': setup.url
             },
             recipient_list=[instance.user.email]
         )
+        
+        logger.info(f"Store approval email sent to {instance.user.email}")
+        
+    except Exception as e:
+        logger.error(f"Error in lodge creation/notification: {e}")
 
 
 class CancelEventRequest(Trackable):
@@ -140,6 +168,14 @@ class UserRequest(Trackable):
         verbose_name='Telefone',
         help_text='Escreva o telefone do usuário',
     )
+    profession = models.ForeignKey(
+        'setup.Profession',
+        on_delete=models.SET_NULL,
+        verbose_name='Profissão',
+        help_text='Selecione sua profissão',
+        blank=True,
+        null=True
+    )
     message = models.TextField(
         verbose_name='Mensagem',
         help_text='Escreva a mensagem do usuário',
@@ -163,7 +199,8 @@ class UserRequest(Trackable):
     )
 
     def __str__(self):
-        return f"Solicitação de {self.name} - {self.email} - {self.phone} - {self.lodge_number}"
+        profession_str = f" ({self.profession})" if self.profession else ""
+        return f"Solicitação de {self.name}{profession_str} - {self.email} - {self.lodge_number}"
     
     class Meta:
         verbose_name = 'Solicitação de Usuário'
@@ -175,34 +212,71 @@ def create_user_on_approval(sender, instance, created, **kwargs):
     """
     Signal to create a CustomUser when a UserRequest is approved and send email notification
     """
+    logger = logging.getLogger(__name__)
     if instance.approved and not created:
-        setup = Setup.objects.last()
-        random_password = get_random_string(12)
+        # Use transaction.on_commit to avoid transaction issues
+        transaction.on_commit(lambda: _create_user_and_notify(instance, logger))
 
+
+def _create_user_and_notify(instance, logger):
+    """
+    Helper function to create user and send notifications after transaction commit
+    """
+    setup = Setup.objects.last()
+    random_password = get_random_string(12)
+
+    try:
+        # Create the user
+        user = CustomUser.objects.create_user(
+            username=instance.email,
+            email=instance.email,
+            password=random_password,
+            first_name=instance.name,
+            last_name=instance.surname,
+            phone_number=instance.phone,
+            profession=instance.profession,
+            is_staff=True
+        )
+        
+        logger.info(f"User created successfully: {user.email}")
+        
+        # Try to find and associate the lodge
         try:
-            CustomUser.objects.create_user(
-                username=instance.email,
-                email=instance.email,
-                password=random_password,
-                first_name=instance.name,
-                last_name=instance.surname,
-                phone_number=instance.phone,
-                is_staff=True,
-                lodge=None
+            from lodge.models import Lodge
+            lodge = Lodge.objects.get(number=instance.lodge_number)
+            
+            # Create UserLodge association
+            from accounts.models import UserLodge
+            UserLodge.objects.create(
+                user=user,
+                lodge=lodge
             )
             
-            # Send approval email with password
-            send_email_notification(
-                subject='Sua solicitação de cadastro foi aprovada',
-                template_name='email/user_request_approval.html',
-                context={
-                    'user': instance,
-                    'password': random_password,
-                    'login_url': f"{setup.url}"
-                },
-                recipient_list=[instance.email]
-            )
+            logger.info(f"User {user.email} associated with lodge {lodge.name}")
             
         except Lodge.DoesNotExist:
-            logger = logging.getLogger(__name__)
-            logger.error(f"Lodge with number {instance.lodge_number} does not exist when trying to create user for {instance.email}")
+            logger.warning(f"Lodge with number {instance.lodge_number} not found for user {instance.email}")
+        except Exception as e:
+            logger.error(f"Error associating user with lodge: {e}")
+        
+        # Send approval email with password only if setup exists
+        if setup:
+            try:
+                send_email_notification(
+                    subject='Sua solicitação de cadastro foi aprovada',
+                    template_name='email/user_request_approval.html',
+                    context={
+                        'user': instance,
+                        'password': random_password,
+                        'login_url': setup.url
+                    },
+                    recipient_list=[instance.email]
+                )
+                logger.info(f"Approval email sent to {instance.email}")
+            except Exception as e:
+                logger.error(f"Error sending approval email: {e}")
+        else:
+            logger.warning(f"No Setup configuration found. Approval email not sent for {instance.email}")
+        
+    except Exception as e:
+        logger.error(f"Error creating user for {instance.email}: {e}")
